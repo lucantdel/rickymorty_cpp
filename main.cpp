@@ -7,7 +7,7 @@
 
 using json = nlohmann::json;
 
-// EJERCICIO: mostrar nombre de episodios en los que sale el personaje
+// EJERCICIO: mostrar nombre de episodios en los que sale el personaje, seguir preguntando personajes hasta introducir cadena vacía
 
 struct Character
 {
@@ -73,103 +73,110 @@ void print_vector(std::vector<std::string> const & v) {
 
 int main()
 {
-  std::cout << "Introduce el nombre (o parte del nombre) del personaje de Rick & Morty: ";
-  std::string search;
-  std::getline(std::cin, search);
 
-  if (search.empty())
-  {
-    std::cerr << "Cadena de búsqueda vacía. Terminando.\n";
-    return 1;
-  }
+    std::cout << "Introduce el nombre (o parte del nombre) del personaje de Rick & Morty: ";
+    std::string search;
 
-  // Petición GET con cpr, usando parámetros (hace URL encoding por ti)
-  auto response = cpr::Get(
-      cpr::Url{"https://rickandmortyapi.com/api/character/"},
-      cpr::Parameters{{"name", search}});
+    while (true) {
+        std::getline(std::cin, search);
 
-  if (response.error)
-  {
-    std::cerr << "Error en la petición HTTP: " << response.error.message << "\n";
-    return 1;
-  }
+        if (search.empty())
+        {
+            std::cerr << "Cadena de búsqueda vacía. Terminando.\n";
+            return 1;
+        }
 
-  if (response.status_code != 200)
-  {
-    std::cerr << "La API devolvió código HTTP "
-              << response.status_code << "\nCuerpo:\n"
-              << response.text << "\n";
-    return 1;
-  }
+        // Petición GET con cpr, usando parámetros (hace URL encoding por ti)
+        auto response = cpr::Get(
+            cpr::Url{"https://rickandmortyapi.com/api/character/"},
+            cpr::Parameters{{"name", search}});
 
-  auto characters = parse_characters(response.text);
-  if (characters.empty())
-  {
-    std::cout << "No se encontraron resultados para: " << search << "\n";
-    return 0;
-  }
+        if (response.error)
+        {
+            std::cerr << "Error en la petición HTTP: " << response.error.message << "\n";
+            return 1;
+        }
 
-  // Mostrar listado de resultados
-  std::cout << "\nResultados encontrados:\n";
-  for (std::size_t i{0}; i < characters.size(); ++i)
-  {
-    std::cout << i << ") " << characters.at(i).name << '\n';
-  }
+        if (response.status_code != 200)
+        {
+            std::cerr << "La API devolvió código HTTP "
+                      << response.status_code << "\nCuerpo:\n"
+                      << response.text << "\n";
+            return 1;
+        }
 
-  // Seleccionar uno
-  std::cout << "\nSelecciona el índice del personaje que te interesa: ";
-  std::size_t index = 0;
-  if (!(std::cin >> index))
-  {
-    std::cerr << "Entrada no válida.\n";
-    return 1;
-  }
+        auto characters = parse_characters(response.text);
+        if (characters.empty())
+        {
+            std::cout << "No se encontraron resultados para: " << search << "\n";
+            return 0;
+        }
 
-  if (index >= characters.size())
-  {
-    std::cerr << "Índice fuera de rango.\n";
-    return 1;
-  }
+        // Mostrar listado de resultados
+        std::cout << "\nResultados encontrados:\n";
+        for (std::size_t i{0}; i < characters.size(); ++i)
+        {
+            std::cout << i << ") " << characters.at(i).name << '\n';
+        }
 
-  auto &c = characters.at(index);
+        // Seleccionar uno
+        std::cout << "\nSelecciona el índice del personaje que te interesa: ";
+        std::size_t index = 0;
+        if (!(std::cin >> index))
+        {
+            std::cerr << "Entrada no válida.\n";
+            return 1;
+        }
 
-  int i = 0;
-  for (const std::string &url: c.episodes) {
+        // limpiar salto de línea que queda en el buffer
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-      auto res = cpr::Get(cpr::Url{url});
+        if (index >= characters.size())
+        {
+            std::cerr << "Índice fuera de rango.\n";
+            return 1;
+        }
 
-      if (res.error)
-      {
-          std::cerr << "Error en la petición HTTP: " << res.error.message << "\n";
-          return 1;
-      }
+        auto &c = characters.at(index);
 
-      if (res.status_code != 200)
-      {
-          std::cerr << "La API devolvió código HTTP "
-                    << res.status_code << "\nCuerpo:\n"
-                    << res.text << "\n";
-          return 1;
-      }
+        int i = 0;
+        for (const std::string &url: c.episodes) {
 
-      auto episode_name = parse_episode(res.text);
+            auto res = cpr::Get(cpr::Url{url});
 
-      c.episodes[i] = episode_name;
-      i++;
-  }
+            if (res.error)
+            {
+                std::cerr << "Error en la petición HTTP: " << res.error.message << "\n";
+                return 1;
+            }
+
+            if (res.status_code != 200)
+            {
+                std::cerr << "La API devolvió código HTTP "
+                          << res.status_code << "\nCuerpo:\n"
+                          << res.text << "\n";
+                return 1;
+            }
+
+            auto episode_name = parse_episode(res.text);
+
+            c.episodes[i] = episode_name;
+            i++;
+        }
 
 
-  std::cout << "\n--- Detalles del personaje ---\n";
-  std::cout << "Nombre : " << c.name << '\n';
-  std::cout << "Planeta (origen): " << c.origin << '\n';
-  std::cout << "Especie: " << c.species << '\n';
-  std::cout << "Status : " << c.status << '\n';
-  if (!c.episodes.empty()) {
-      std::cout << "Episodes: \n";
-      print_vector(c.episodes);
-  } else {
-      std::cout << "No se han encontrado episodios de este personaje.\n";
-  }
+        std::cout << "\n--- Detalles del personaje ---\n";
+        std::cout << "Nombre : " << c.name << '\n';
+        std::cout << "Planeta (origen): " << c.origin << '\n';
+        std::cout << "Especie: " << c.species << '\n';
+        std::cout << "Status : " << c.status << '\n';
+        if (!c.episodes.empty()) {
+            std::cout << "Episodes: \n";
+            print_vector(c.episodes);
+        } else {
+            std::cout << "No se han encontrado episodios de este personaje.\n";
+        }
 
-  return 0;
+        std::cout << "\nIntroduce el nombre (o parte del nombre) de otro personaje de Rick & Morty: ";
+    }
 }
