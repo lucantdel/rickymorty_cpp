@@ -44,7 +44,6 @@ std::vector<Character> parse_characters(const std::string &body)
     }
 
     characters.push_back(std::move(c));
-    characters.push_back(c);
   }
 
   return characters;
@@ -52,71 +51,71 @@ std::vector<Character> parse_characters(const std::string &body)
 
 int main()
 {
-    std::cout << "Introduce el nombre (o parte del nombre) del personaje de Rick & Morty: ";
-    std::string search;
-    std::getline(std::cin, search);
+  std::cout << "Introduce el nombre (o parte del nombre) del personaje de Rick & Morty: ";
+  std::string search;
+  std::getline(std::cin, search);
 
-    if (search.empty())
-    {
-      std::cerr << "Cadena de búsqueda vacía. Terminando.\n";
-      return 1;
-    }
+  if (search.empty())
+  {
+    std::cerr << "Cadena de búsqueda vacía. Terminando.\n";
+    return 1;
+  }
 
-    // Petición GET con cpr, usando parámetros (hace URL encoding por ti)
-    auto response = cpr::Get(
-        cpr::Url{"https://rickandmortyapi.com/api/character/"},
-        cpr::Parameters{{"name", search}});
+  // Petición GET con cpr, usando parámetros (hace URL encoding por ti)
+  auto response = cpr::Get(
+      cpr::Url{"https://rickandmortyapi.com/api/character/"},
+      cpr::Parameters{{"name", search}});
 
-    if (response.error)
-    {
-      std::cerr << "Error en la petición HTTP: " << response.error.message << "\n";
-      return 1;
-    }
+  if (response.error)
+  {
+    std::cerr << "Error en la petición HTTP: " << response.error.message << "\n";
+    return 1;
+  }
 
-    if (response.status_code != 200)
-    {
-      std::cerr << "La API devolvió código HTTP "
-                << response.status_code << "\nCuerpo:\n"
-                << response.text << "\n";
-      return 1;
-    }
+  if (response.status_code != 200)
+  {
+    std::cerr << "La API devolvió código HTTP "
+              << response.status_code << "\nCuerpo:\n"
+              << response.text << "\n";
+    return 1;
+  }
 
-    auto characters = parse_characters(response.text);
-    if (characters.empty())
-    {
-      std::cout << "No se encontraron resultados para: " << search << "\n";
-      return 0;
-    }
+  auto characters = parse_characters(response.text);
+  if (characters.empty())
+  {
+    std::cout << "No se encontraron resultados para: " << search << "\n";
+    return 0;
+  }
 
-    // Mostrar listado de resultados
-    std::cout << "\nResultados encontrados:\n";
-    for (std::size_t i{0}; i < characters.size(); ++i)
-    {
-      std::cout << i << ") " << characters.at(i).name << '\n';
-    }
+  // Mostrar listado de resultados
+  std::cout << "\nResultados encontrados:\n";
+  for (std::size_t i{0}; i < characters.size(); ++i)
+  {
+    std::cout << i << ") " << characters.at(i).name << '\n';
+  }
 
-    // Seleccionar uno
-    std::cout << "\nSelecciona el índice del personaje que te interesa: ";
-    std::size_t index = 0;
-    if (!(std::cin >> index))
-    {
-      std::cerr << "Entrada no válida.\n";
-      return 1;
-    }
+  // Seleccionar uno
+  std::cout << "\nSelecciona el índice del personaje que te interesa: ";
+  std::size_t index = 0;
+  if (!(std::cin >> index))
+  {
+    std::cerr << "Entrada no válida.\n";
+    return 1;
+  }
 
-    if (index >= characters.size())
-    {
-      std::cerr << "Índice fuera de rango.\n";
-      return 1;
-    }
+  if (index >= characters.size())
+  {
+    std::cerr << "Índice fuera de rango.\n";
+    return 1;
+  }
 
-    const auto &c = characters.at(index);
+  const auto &c = characters.at(index);
 
-    std::cout << "\n--- Detalles del personaje ---\n";
-    std::cout << "Nombre : " << c.name << '\n';
-    std::cout << "Planeta (origen): " << c.origin << '\n';
-    std::cout << "Especie: " << c.species << '\n';
-    std::cout << "Status : " << c.status << '\n';
+  std::cout << "\n--- Detalles del personaje ---\n";
+  std::cout << "Nombre : " << c.name << '\n';
+  std::cout << "Planeta (origen): " << c.origin << '\n';
+  std::cout << "Especie: " << c.species << '\n';
+  std::cout << "Status : " << c.status << '\n';
 
   return 0;
 }
