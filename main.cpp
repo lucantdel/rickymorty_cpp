@@ -7,12 +7,15 @@
 
 using json = nlohmann::json;
 
+// EJERCICIO: mostrar nombre de episodios en los que sale el personaje
+
 struct Character
 {
   std::string name;
   std::string origin;
   std::string species;
   std::string status;
+  std::vector<std::string> episodes;
 };
 
 std::vector<Character> parse_characters(const std::string &body)
@@ -43,10 +46,29 @@ std::vector<Character> parse_characters(const std::string &body)
       c.origin = "Desconocido";
     }
 
+    if (item.contains("episode") && item["episode"].is_array())
+    {
+        for (const auto &url: item["episode"]) {
+            c.episodes.push_back(url);
+        }
+    }
+
     characters.push_back(std::move(c));
   }
 
   return characters;
+}
+
+std::string parse_episode(const std::string &body) {
+    json j = json::parse(body);
+    return j["name"];
+}
+
+void print_vector(std::vector<std::string> const & v) {
+    for (const auto &elem: v) {
+        std::cout << elem << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 int main()
@@ -109,13 +131,45 @@ int main()
     return 1;
   }
 
-  const auto &c = characters.at(index);
+  auto &c = characters.at(index);
+
+  int i = 0;
+  for (const std::string &url: c.episodes) {
+
+      auto res = cpr::Get(cpr::Url{url});
+
+      if (res.error)
+      {
+          std::cerr << "Error en la petición HTTP: " << res.error.message << "\n";
+          return 1;
+      }
+
+      if (res.status_code != 200)
+      {
+          std::cerr << "La API devolvió código HTTP "
+                    << res.status_code << "\nCuerpo:\n"
+                    << res.text << "\n";
+          return 1;
+      }
+
+      auto episode_name = parse_episode(res.text);
+
+      c.episodes[i] = episode_name;
+      i++;
+  }
+
 
   std::cout << "\n--- Detalles del personaje ---\n";
   std::cout << "Nombre : " << c.name << '\n';
   std::cout << "Planeta (origen): " << c.origin << '\n';
   std::cout << "Especie: " << c.species << '\n';
   std::cout << "Status : " << c.status << '\n';
+  if (!c.episodes.empty()) {
+      std::cout << "Episodes: \n";
+      print_vector(c.episodes);
+  } else {
+      std::cout << "No se han encontrado episodios de este personaje.\n";
+  }
 
   return 0;
 }
