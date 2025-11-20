@@ -44,6 +44,7 @@ std::vector<Character> parse_characters(const std::string &body)
     }
 
     characters.push_back(std::move(c));
+    characters.push_back(c);
   }
 
   return characters;
@@ -51,8 +52,6 @@ std::vector<Character> parse_characters(const std::string &body)
 
 int main()
 {
-  try
-  {
     std::cout << "Introduce el nombre (o parte del nombre) del personaje de Rick & Morty: ";
     std::string search;
     std::getline(std::cin, search);
@@ -91,9 +90,9 @@ int main()
 
     // Mostrar listado de resultados
     std::cout << "\nResultados encontrados:\n";
-    for (std::size_t i = 0; i < characters.size(); ++i)
+    for (std::size_t i{0}; i < characters.size(); ++i)
     {
-      std::cout << i << ") " << characters[i].name << '\n';
+      std::cout << i << ") " << characters.at(i).name << '\n';
     }
 
     // Seleccionar uno
@@ -111,19 +110,13 @@ int main()
       return 1;
     }
 
-    const auto &c = characters[index];
+    const auto &c = characters.at(index);
 
     std::cout << "\n--- Detalles del personaje ---\n";
     std::cout << "Nombre : " << c.name << '\n';
     std::cout << "Planeta (origen): " << c.origin << '\n';
     std::cout << "Especie: " << c.species << '\n';
     std::cout << "Status : " << c.status << '\n';
-  }
-  catch (const std::exception &ex)
-  {
-    std::cerr << "Se produjo una excepción: " << ex.what() << '\n';
-    return 1;
-  }
 
   return 0;
 }
