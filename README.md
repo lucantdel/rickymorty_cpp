@@ -4,7 +4,7 @@
 - [Lucas Antoñanzas](https://github.com/lucantdel)
 - [Adrián del Cristo Vela](https://github.com/Adrian-Vela1)
 - [Andrés Rodríguez](https://github.com/andresrodri00)
-- [Carlos Saavedra](https://github.com/usuario)
+- [Carlos Saavedra](https://github.com/carlossaav)
 
 
 ## 📌 Descripción
