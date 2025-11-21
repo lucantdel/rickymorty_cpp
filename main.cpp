@@ -82,7 +82,7 @@ int main()
 
         if (search.empty())
         {
-            std::cerr << "Cadena de búsqueda vacía. Terminando.\n";
+            std::cerr << "Cadena de busqueda vacia. Terminando.\n";
             return 1;
         }
 
@@ -93,13 +93,13 @@ int main()
 
         if (response.error)
         {
-            std::cerr << "Error en la petición HTTP: " << response.error.message << "\n";
+            std::cerr << "Error en la peticion HTTP: " << response.error.message << "\n";
             return 1;
         }
 
         if (response.status_code != 200)
         {
-            std::cerr << "La API devolvió código HTTP "
+            std::cerr << "La API devolvio codigo HTTP "
                       << response.status_code << "\nCuerpo:\n"
                       << response.text << "\n";
             return 1;
@@ -120,11 +120,11 @@ int main()
         }
 
         // Seleccionar uno
-        std::cout << "\nSelecciona el índice del personaje que te interesa: ";
+        std::cout << "\nSelecciona el indice del personaje que te interesa: ";
         std::size_t index = 0;
         if (!(std::cin >> index))
         {
-            std::cerr << "Entrada no válida.\n";
+            std::cerr << "Entrada no valida.\n";
             return 1;
         }
 
@@ -133,7 +133,7 @@ int main()
 
         if (index >= characters.size())
         {
-            std::cerr << "Índice fuera de rango.\n";
+            std::cerr << "Indice fuera de rango.\n";
             return 1;
         }
 
@@ -146,13 +146,13 @@ int main()
 
             if (res.error)
             {
-                std::cerr << "Error en la petición HTTP: " << res.error.message << "\n";
+                std::cerr << "Error en la peticion HTTP: " << res.error.message << "\n";
                 return 1;
             }
 
             if (res.status_code != 200)
             {
-                std::cerr << "La API devolvió código HTTP "
+                std::cerr << "La API devolvio codigo HTTP "
                           << res.status_code << "\nCuerpo:\n"
                           << res.text << "\n";
                 return 1;
